@@ -5,7 +5,7 @@ const router = express.Router();
 router.post("/", async (req, res) => {
     let {userId, pwd} = req.body;
     try{
-        let query = "SELECT userId, userName, phone FROM TBL_USER WHERE USERID = ? AND PWD = ?";
+        let query = "SELECT userId, userName, phone, status FROM TBL_USER WHERE USERID = ? AND PWD = ?";
         let [user] = await db.query(query, [userId, pwd]);
         let result = {};
         if(user.length > 0){
@@ -14,6 +14,7 @@ router.post("/", async (req, res) => {
                 sessionId : user[0].userId,
                 sessionName : user[0].userName,
                 sessionPhone : user[0].phone,
+                sessionStatus : user[0].status,
             }
             console.log(req.session);
             result = {
@@ -43,6 +44,20 @@ router.get("/info", (req, res) => {
             isLogin : false
         })
     }
+})
+
+router.get("/logout", (req, res) => {
+    req.session.destroy(err => {
+        if(err){
+            console.log("세션 삭제 안됨");
+            res.status(500).send("로그아웃 실패!");
+        } else {
+            res.clearCookie("connect.sid");
+            res.json({
+                message : "로그아웃 되셨음"
+            });
+        }
+    });
 })
 
 module.exports = router;
