@@ -94,6 +94,15 @@
         },
         mounted() {
             var self = this;
+            fetch("http://localhost:3000/user/info", {
+                method : "GET",
+                credentials : "include"
+            })
+            .then( res=>res.json() )
+            .then( data => {
+                console.log(data);
+            })
+
             self.fnGetList();
         }
     });
