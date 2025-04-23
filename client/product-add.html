@@ -21,6 +21,7 @@
         <div>가격 : <input v-model="info.price"></div>
         <div>재고 : <input v-model="info.stock"></div>
         <div>종류 : <input v-model="info.category"></div>
+        <div>파일업로드 : <input type="file" @change="fnFileChange"></div>
         <div>
             <button v-if="productId == ''" @click="fnAdd">등록</button>
             <button v-else @click="fnEdit">수정</button>
@@ -39,7 +40,8 @@
                     stock : "",
                     category : ""
                 },
-                productId : ""
+                productId : "",
+                selectedFile : ""
             };
         },
         methods: {
@@ -55,6 +57,10 @@
                     .then( res => res.json() )
                     .then( data => {
                         console.log(data);
+                        if (self.selectedFile) {
+                            self.fnUploadFile(data.result.insertId);
+                        }
+                        
                     } )
                     .catch( err => {
                         console.log("서버 에러");
@@ -86,7 +92,29 @@
                     .catch( err => {
                         console.log("서버 에러");
                     })
-            }
+            },
+            fnFileChange() {
+                let self = this;
+                self.selectedFile = event.target.files[0];
+            },
+
+            fnUploadFile(productId) {
+                let self = this;
+				const formData = new FormData();
+				formData.append("file", self.selectedFile); 
+                formData.append("productId", productId);
+				fetch("http://localhost:3000/product/upload", {
+					method: "POST",
+					body: formData
+				})
+				.then(res => res.json())
+				.then(data => {
+					console.log(data);
+				})
+				.catch(err => {
+					console.error(err);
+				});
+			}
         },
         mounted() {
             var self = this;

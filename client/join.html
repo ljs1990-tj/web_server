@@ -11,12 +11,21 @@
 <body>
 	<div id="app">
 		<div>
-			아이디 : <input v-model="userId">  
+			아이디 : <input v-model="user.userId">  
 		</div>
 		<div>
-			비밀번호 : <input v-model="pwd">  
+			비밀번호 : <input v-model="user.pwd">  
 		</div>
-		<button @click="fnLogin">로그인</button>
+        <div>
+			이름 : <input v-model="user.name">  
+		</div>
+        <div>
+			주소 : <input v-model="user.addr">  
+		</div>
+        <div>
+			번호 : <input v-model="user.phone">  
+		</div>
+		<button @click="fnJoin">회원가입</button>
 	</div>
 </body>
 </html>
@@ -24,31 +33,28 @@
     const app = Vue.createApp({
         data() {
             return {
-                userId : "",
-				pwd : ""
+                user : {
+                    userId : "",
+                    pwd : "",
+                    name : "",
+                    addr : "",
+                    phone : ""
+                }
             };
         },
         methods: {
-            fnLogin(){
+            fnJoin(){
 				var self = this;
-				fetch("http://localhost:3000/user", {
+				fetch("http://localhost:3000/user/join",{
                     method : "POST",
                     headers : {
                         "Content-type" : "application/json"   
                     },
-                    credentials : "include",
-                    body : JSON.stringify({
-                        userId : self.userId,
-                        pwd : self.pwd
-                    })
+                    body : JSON.stringify(self.user)
                 })
                 .then(res => res.json())
                 .then(data => {
-                    alert(data.message);
-                    if(data.user){
-                        location.href="product-list.html";
-                    }
-                    
+                    console.log(data);
                 });
             }
         },
@@ -58,4 +64,3 @@
     });
     app.mount('#app');
 </script>
-​
