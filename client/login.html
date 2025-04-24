@@ -16,7 +16,8 @@
 		<div>
 			비밀번호 : <input v-model="pwd">  
 		</div>
-		<button @click="fnLogin">로그인</button>
+		<button @click="fnLogin">로그인(세션)</button>
+        <button @click="fnLoginJWT">로그인(JWT)</button>
 	</div>
 </body>
 </html>
@@ -47,6 +48,29 @@
                     alert(data.message);
                     if(data.user){
                         location.href="product-list.html";
+                    }
+                    
+                });
+            },
+            fnLoginJWT(){
+				var self = this;
+				fetch("http://localhost:3000/login", {
+                    method : "POST",
+                    headers : {
+                        "Content-type" : "application/json"   
+                    },
+                    body : JSON.stringify({
+                        userId : self.userId,
+                        pwd : self.pwd
+                    })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    console.log(data.token);
+                    localStorage.setItem("token", data.token);
+                    alert(data.message);
+                    if(data.token){
+                        location.href="product-list-jwt.html";
                     }
                     
                 });
