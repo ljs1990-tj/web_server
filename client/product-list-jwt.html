@@ -84,7 +84,10 @@
             fnRemove(productId){
                 let self = this;
                 fetch("http://localhost:3000/product/"+productId, {
-                    method : "DELETE"
+                    method : "DELETE",
+                    headers: {
+                        "Authorization": "Bearer " + localStorage.getItem("token")
+                    }
                 })
                     .then( res => res.json())
                     .then( data => {
@@ -101,9 +104,20 @@
             var self = this;
             let token = localStorage.getItem('token');
             if(token){
+                // const base64Payload = token.split('.')[1];
+                // const payload = atob(base64Payload); // base64 디코딩
+                // let user = JSON.parse(payload); // JSON으로 파싱
+                // Base64URL → Base64 변환
                 const base64Payload = token.split('.')[1];
-                const payload = atob(base64Payload); // base64 디코딩
-                let user = JSON.parse(payload); // JSON으로 파싱
+                const base64 = base64Payload.replace(/-/g, '+').replace(/_/g, '/');
+                const binary = atob(base64);
+
+                // Binary → UTF-8 디코딩
+                const bytes = Uint8Array.from(binary, c => c.charCodeAt(0));
+                const json = new TextDecoder().decode(bytes);
+                const user = JSON.parse(json);
+                console.log(user);
+                self.user = user;
                 self.fnGetList();
             } else {
                 alert("로그인 해라");

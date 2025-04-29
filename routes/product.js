@@ -1,5 +1,6 @@
 const express = require('express');
 const db = require('../db');
+const authMiddleware = require('../auth');
 // 1. 패키지 추가
 const multer = require('multer');
 const router = express.Router();
@@ -29,11 +30,27 @@ router.post('/upload', upload.single('file'), async (req, res) => {
 });
 
 
+// router.get("/", async (req, res) => {
+//     let {pageSize, offset} = req.query;
+//     try{
+//         let sql = "SELECT * FROM TBL_PRODUCT LIMIT ? OFFSET ?";
+//         let [list] = await db.query(sql, [parseInt(pageSize), parseInt(offset)]);
+//         let [count] = await db.query("SELECT COUNT(*) AS cnt FROM TBL_PRODUCT");
+//         res.json({
+//             message : "result",
+//             list : list,
+//             count : count[0].cnt
+//         });
+//     }catch(err){
+//         console.log("에러 발생!");
+//         res.status(500).send("Server Error");
+//     }
+// })
+
 router.get("/", async (req, res) => {
-    let {pageSize, offset} = req.query;
     try{
-        let sql = "SELECT * FROM TBL_PRODUCT LIMIT ? OFFSET ?";
-        let [list] = await db.query(sql, [parseInt(pageSize), parseInt(offset)]);
+        let sql = "SELECT * FROM TBL_PRODUCT";
+        let [list] = await db.query(sql);
         let [count] = await db.query("SELECT COUNT(*) AS cnt FROM TBL_PRODUCT");
         res.json({
             message : "result",
@@ -78,7 +95,7 @@ router.post("/", async (req, res) => {
     }
 })
 
-router.delete("/:productId", async (req, res) => {
+router.delete("/:productId", authMiddleware, async (req, res) => {
     let { productId } = req.params;
     try{
         let result = await db.query("DELETE FROM TBL_PRODUCT WHERE PRODUCTID = " + productId);
