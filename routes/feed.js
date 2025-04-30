@@ -14,16 +14,23 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 // api 호출
-router.post('/upload', upload.single('file'), async (req, res) => {
+router.post('/upload', upload.array('file'), async (req, res) => {
     let {feedId} = req.body;
-    const filename = req.file.filename; 
-    const destination = req.file.destination; 
+    const files = req.files;
+    // const filename = req.file.filename; 
+    // const destination = req.file.destination; 
     try{
-        let query = "INSERT INTO TBL_FEED_IMG VALUES(NULL, ?, ?, ?)";
-        let result = await db.query(query, [feedId, filename, destination]);
+        let results = [];
+        for(let file of files){
+            let filename = file.filename;
+            let destination = file.destination;
+            let query = "INSERT INTO TBL_FEED_IMG VALUES(NULL, ?, ?, ?)";
+            let result = await db.query(query, [feedId, filename, destination]);
+            results.push(result);
+        }
         res.json({
             message : "result",
-            result : result
+            result : results
         });
     } catch(err){
         console.log("에러 발생!");
