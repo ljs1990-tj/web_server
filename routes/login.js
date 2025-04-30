@@ -27,17 +27,19 @@ router.post("/", async (req, res) => {
                 console.log(req.session);
                 result = {
                     message : "로그인 성공!",
-                    // 토큰 리턴
+                    success : true,
                     token : token
                 }
             } else {
                 result = {
+                    success : false,
                     message : "비밀번호 확인하셈"
                 }
             }
             
         } else {
             result = {
+                success : false,
                 message : "아이디 확인하셈"
             }
         }

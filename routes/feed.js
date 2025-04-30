@@ -1,11 +1,44 @@
 const express = require('express');
 const db = require('../db');
+const authMiddleware = require('../auth');
 const router = express.Router();
+
+// 1. 패키지 추가
+const multer = require('multer');
+
+// 2. 저장 경로 및 파일명
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => cb(null, 'uploads/'),
+    filename: (req, file, cb) => cb(null, Date.now() + '-' + file.originalname)
+});
+const upload = multer({ storage });
+
+// api 호출
+router.post('/upload', upload.single('file'), async (req, res) => {
+    let {feedId} = req.body;
+    const filename = req.file.filename; 
+    const destination = req.file.destination; 
+    try{
+        let query = "INSERT INTO TBL_FEED_IMG VALUES(NULL, ?, ?, ?)";
+        let result = await db.query(query, [feedId, filename, destination]);
+        res.json({
+            message : "result",
+            result : result
+        });
+    } catch(err){
+        console.log("에러 발생!");
+        res.status(500).send("Server Error");
+    }
+});
+
 
 // api
 router.get("/", async (req, res) => {
+    let { userId } = req.query;
     try{
         let sql = "SELECT * FROM TBL_FEED";
+        if(userId) sql += " WHERE USERID = '" + userId + "'";
+
         let [list] = await db.query(sql);
         res.json({
             message : "result",
@@ -32,7 +65,7 @@ router.get("/:id", async (req, res) => {
     }
 })
 
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", authMiddleware, async (req, res) => {
     let { id } = req.params;
     try{
         let sql = "DELETE FROM TBL_FEED WHERE ID = " + id;
@@ -71,7 +104,7 @@ router.post("/", async (req, res) => {
         let result = await db.query(sql, [userId, content]);
         res.json({
             message : "result",
-            result : result
+            result : result[0]
         });
     }catch(err){
         console.log("에러 발생!");
