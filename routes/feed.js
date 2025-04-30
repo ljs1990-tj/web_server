@@ -44,12 +44,19 @@ router.get("/", async (req, res) => {
     let { userId } = req.query;
     try{
         let sql = "SELECT * FROM TBL_FEED";
-        if(userId) sql += " WHERE USERID = '" + userId + "'";
+        let imgSql = "SELECT * FROM TBL_FEED F "
+                    + "INNER JOIN TBL_FEED_IMG I ON F.ID = I.FEEDID ";
+        if(userId) {
+            sql += " WHERE USERID = '" + userId + "'";
+            imgSql += " WHERE USERID = '" + userId + "'";
+        }
 
         let [list] = await db.query(sql);
+        let [imgList] = await db.query(imgSql);
         res.json({
             message : "result",
-            list : list
+            list : list,
+            imgList : imgList
         });
     }catch(err){
         console.log("에러 발생!");
