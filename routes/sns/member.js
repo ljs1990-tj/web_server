@@ -2,10 +2,37 @@ const express = require('express');
 const db = require('../../db');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+// 1. 파일 업로드 패키지 추가
+const multer = require('multer');
 const router = express.Router();
-
-
 const JWT_KEY = "show-me-the-money";
+
+// 2. 저장 경로 및 파일명
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => cb(null, 'uploads/'),
+    filename: (req, file, cb) => cb(null, Date.now() + '-' + file.originalname)
+});
+const upload = multer({ storage });
+
+router.post('/upload', upload.single('file'), async (req, res) => {
+    let {email} = req.body;
+    const filename = req.file.filename; 
+    const destination = req.file.destination; 
+    try{
+        let query = "UPDATE TBL_MEMBER SET PROFILEIMG = ? WHERE EMAIL = ?";
+        let result = await db.query(query, [destination+filename, email]);
+        
+        res.json({
+            message : "result",
+            result : result
+        });
+    } catch(err){
+        console.log("에러 발생!");
+        res.status(500).send("Server Error");
+    }
+});
+
+
 router.post("/", async (req, res) => {
     let {email, pwd} = req.body;
     try{
